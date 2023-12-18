@@ -1,2 +1,2 @@
-# ffxivclassic2sim
-ffxiv Classical Concepts 2 Simulator
+# FFXIV Classical Concept 2 Simulator
+Simulate the p12s p2 mechanic.
