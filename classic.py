@@ -226,8 +226,9 @@ class Player:
         can.create_oval(self.x-10,self.y-10,self.x+10,self.y+10, fill="black")
 
 class OptionPanel:
-    def __init__(self, tk):
+    def __init__(self, tk, app):
         self.tk = tk
+        self.app = app
         self.pausevalue = False
         self.singleplayer = True
         self.hard = False
@@ -255,6 +256,31 @@ class OptionPanel:
                 command=self.hardmode)
         self.hardb.pack(side="top")
 
+        self.blueVar = BooleanVar()
+        self.blueVar.set(True)
+        self.greenVar = BooleanVar()
+        self.greenVar.set(True)
+        self.purpleVar = BooleanVar()
+        self.purpleVar.set(True)
+        self.orangeVar = BooleanVar()
+        self.orangeVar.set(True)
+
+        self.internalFrame = Frame(self.frame)
+        self.internalFrame.pack(side="top")
+        
+        self.blueSymb = Checkbutton(self.internalFrame, image=self.app.player.BLUE, variable=self.blueVar)
+        self.blueSymb.pack()
+        self.greenSymb = Checkbutton(self.internalFrame, image=self.app.player.GREEN, variable=self.greenVar)
+        self.greenSymb.pack()
+        self.purpleSymb = Checkbutton(self.internalFrame, image=self.app.player.PURPLE, variable=self.purpleVar)
+        self.purpleSymb.pack()
+        self.orangeSymb = Checkbutton(self.internalFrame, image=self.app.player.ORANGE, variable=self.orangeVar)
+        self.orangeSymb.pack()
+
+        self.skip = Button(self.frame, text="Finish CastBar", command=self.skip_castbar)
+        self.skip.pack(side="top")
+
+
     def hardmode(self):
         self.hard = not self.hard
         if self.hard:
@@ -268,6 +294,18 @@ class OptionPanel:
     def switch_single(self):
         self.singleplayer = not self.singleplayer
 
+    def skip_castbar(self):
+        self.app.castbar.progress = 0.99
+
+    def get_marker_possibilities(self):
+        markers = ["B","G","P","O"]
+        output = []
+        for k,var in enumerate([self.blueVar, self.greenVar, self.purpleVar, self.orangeVar]):
+            if var.get():
+                output.append(markers[k])
+        return output
+
+
 class App:
     def __init__(self):
         self.width = 1024
@@ -279,7 +317,8 @@ class App:
         self.can = Canvas(width=self.width, height=self.height+100)
         self.can.pack(side="left")
 
-        self.panel = OptionPanel(self.tk)
+        self.player = Player(self.width/2, self.height/2)
+        self.panel = OptionPanel(self.tk, self)
 
         self.bg = PhotoImage(file=resource_path("p2-waymarks.png"))
         self.can.create_image(0,0, image=self.bg, anchor="nw")
@@ -288,7 +327,6 @@ class App:
         self.panel.terobj = self.loader
         self.terrain = self.loader.get_one()
         self.castbar = CastBar(100, self.height + 30, self.width - 100, self.height + 90)
-        self.player = Player(self.width/2, self.height/2)
         self.player2 = Player(self.width/2, self.height/2)
         self.player2.marker = self.player.marker
 
@@ -321,7 +359,7 @@ class App:
                 self.castbar.progress = 0
                 self.castbar.text = "Panta Rhei"
                 self.terrain = self.loader.get_one(self.panel.hard)
-                self.player.marker = random.choice(["B","P","G","O"])
+                self.player.marker = random.choice(self.panel.get_marker_possibilities())
                 if not self.panel.singleplayer:
                     self.player2.marker = self.player.marker
                 self.show()
